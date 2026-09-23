@@ -12,7 +12,11 @@ export function AppLayout({ children }: PropsWithChildren) {
       <div className="workspace-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
       <nav className="side-nav" aria-label="Основная навигация">
         <NavLink to="/employees"><Icon name="users" width="18" height="18" />Сотрудники</NavLink>
-        <NavLink to="/hr"><Icon name="chart" width="18" height="18" />HR-аналитика</NavLink>
+        <NavLink to="/hr" end><Icon name="chart" width="18" height="18" />HR-аналитика</NavLink>
+        <NavLink to="/hr/overview">Обзор команды</NavLink>
+        <NavLink to="/hr/skill-gaps">Разрывы навыков</NavLink>
+        <NavLink to="/hr/no-next-step">Нет следующего шага</NavLink>
+        <NavLink to="/hr/participation">Участие в обучении</NavLink>
       </nav>
       <div className="sidebar-bottom"><div className="sidebar-workspace"><div className="sidebar-workspace-mark"><Icon name="users" /></div><div><div className="demo-badge"><span className="status-dot"/>HR-кабинет</div><div className="sidebar-caption">Развитие вашей команды</div></div></div><button className="sidebar-logout" disabled={loading} onClick={() => void logout()}><Icon name="logout" width="16" height="16" />Выйти из кабинета</button></div>
     </aside>
