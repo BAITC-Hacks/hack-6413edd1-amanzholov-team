@@ -155,7 +155,7 @@ Compose запускает PostgreSQL, применяет миграции, со
 | `LLM_ENDPOINT` | Необязательный адрес AI-сервиса с `/v1`; без него работают рекомендации по правилам |
 | `LLM_TIMEOUT_SECONDS` | Тайм-аут AI, по умолчанию 3 секунды |
 
-Для обычного запуска достаточно `backend/.env`: корневой `.env` и `.env` мобильного интерфейса не требуются. Настройка AI описана в [README backend](backend/README.md#часы-рекомендации-и-ai).
+Для обычного запуска достаточно `backend/.env`: корневой `.env` и `.env` мобильного интерфейса не требуются. Для подключения AI задайте `LLM_ENDPOINT` с окончанием `/v1`, `LLM_MODEL` и при необходимости `LLM_API_KEY`. Для сервиса на хосте из Docker используйте адрес `host.docker.internal`. Внешний AI требует HTTPS и `ALLOW_EXTERNAL_AI=true`.
 
 ## Разработка и проверки
 
@@ -197,7 +197,14 @@ uv run mypy src
 uv run pytest
 ```
 
-Без `TEST_DATABASE_URL` PostgreSQL-тесты пропускаются. Полный прогон через `scripts/Check.ps1` требует отдельной тестовой PostgreSQL с именем базы, заканчивающимся на `_test`. Инструкции по тестовой базе и локальному запуску API находятся в [README backend](backend/README.md).
+Без `TEST_DATABASE_URL` PostgreSQL-тесты пропускаются. Полный прогон через `scripts/Check.ps1` требует отдельной тестовой PostgreSQL с именем базы, заканчивающимся на `_test`. Из папки `backend` в PowerShell:
+
+```powershell
+docker compose --profile test up -d --wait db-test
+# Замените YOUR_URL_SAFE_PASSWORD значением POSTGRES_PASSWORD из backend/.env.
+$env:TEST_DATABASE_URL = 'postgresql+asyncpg://career_quest:YOUR_URL_SAFE_PASSWORD@localhost:55433/career_quest_test'
+./scripts/Check.ps1
+```
 
 ## Остановка и диагностика
 
@@ -220,9 +227,6 @@ docker compose -f backend/compose.yaml down
 
 Проект — хакатонный прототип с демонстрационной авторизацией. Production-конфигурация запрещает demo-auth и demo-seed; корпоративный SSO пока не реализован. Для рабочего развёртывания потребуется полноценная авторизация и собственные секреты.
 
-- [Backend: API, импорт, AI и тестирование](backend/README.md)
-- [HR-интерфейс](frontend/README.md)
-- [Мобильный кабинет](frontend/mobile/README.md)
 - [Архитектура](backend/docs/architecture.md)
 - [Сценарий демонстрации](backend/docs/demo.md)
 - [Допущения и ограничения](backend/docs/assumptions.md)
