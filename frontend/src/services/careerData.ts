@@ -3,6 +3,13 @@ import type { Activity, CareerDataset, Employee, Event, Grade, Recommendation, R
 type JsonFile<T> = { meta?: { as_of_date?: string }; employees?: T[]; events?: T[]; skills?: T[]; role_profiles?: T[] }
 const gradeOrder = ['Junior', 'Middle', 'Senior', 'Lead']
 
+export function formatRussianCount(count: number, forms: [string, string, string]) {
+  const remainder100 = count % 100
+  const remainder10 = count % 10
+  const form = remainder100 >= 11 && remainder100 <= 14 ? forms[2] : remainder10 === 1 ? forms[0] : remainder10 >= 2 && remainder10 <= 4 ? forms[1] : forms[2]
+  return `${count} ${form}`
+}
+
 export function parseCsv(text: string): Activity[] {
   const lines = text.trim().split(/\r?\n/)
   const headers = lines.shift()?.split(',') ?? []
@@ -70,7 +77,7 @@ export function getRecommendations(dataset: CareerDataset, employee: Employee): 
     const score = usefulGain * 10 + (improvesCritical ? 18 : 0) + (completedHistory.length ? 5 : 0) + (meetsPrerequisites ? 4 : -100) - negativeHistory.length * 12
     const mainImpact = impacts[0]
     const historyReason = negativeHistory.length
-      ? { label: 'История участия', detail: `В похожих активностях ${negativeHistory.length} пропусков или отказов; это снизило приоритет шага.`, icon: '↘' }
+      ? { label: 'История участия', detail: `Есть ${formatRussianCount(negativeHistory.length, ['факт пропуска или отказа', 'факта пропуска или отказа', 'фактов пропусков или отказов'])} в похожих активностях; это снизило приоритет шага.`, icon: '↘' }
       : completedHistory.length
         ? { label: 'История участия', detail: `Есть ${completedHistory.length} успешно завершённых похожих активностей.`, icon: '✓' }
         : { label: 'История участия', detail: 'В истории нет похожих отказов или пропусков; дополнительный штраф не применён.', icon: '↗' }

@@ -1,14 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
+import { useEffect, useState, type PropsWithChildren } from 'react'
 import { loadDataset, parseCsv } from '../services/careerData'
 import type { Activity, CareerDataset, Employee } from '../types/career'
-
-type CareerContextValue = {
-  dataset: CareerDataset | null; loading: boolean; error: string | null
-  completeActivity: (employeeId: string, eventId: string) => void
-  importSupplemental: (employeesFile: File, historyFile: File) => Promise<number>
-}
+import { CareerDataContext } from './careerDataStore'
 const storageKey = 'career-quest-local-dataset-v1'
-const CareerDataContext = createContext<CareerContextValue | null>(null)
 
 export function CareerDataProvider({ children }: PropsWithChildren) {
   const [dataset, setDataset] = useState<CareerDataset | null>(null)
@@ -63,21 +57,19 @@ export function CareerDataProvider({ children }: PropsWithChildren) {
     if (incomingActivities.some((item) => !knownEvents.has(item.event_id))) throw new Error('История содержит event_id, которого нет в каталоге мероприятий.')
     const employees = new Map(dataset.employees.map((item) => [item.employee_id, item]))
     incomingEmployees.forEach((item) => employees.set(item.employee_id, item))
-    const existingRecords = new Set(dataset.activities.map((item) => item.record_id))
     const validStatuses = new Set(['completed', 'in_progress', 'dropped', 'no_show', 'declined', 'overdue'])
     if (incomingActivities.some((item) => !item.record_id || !item.employee_id || !item.date || !validStatuses.has(item.status))) throw new Error('CSV содержит некорректную запись истории участия.')
-    const newActivities = incomingActivities.filter((item) => !existingRecords.has(item.record_id))
-    if (newActivities.some((item) => !employees.has(item.employee_id))) throw new Error('История содержит сотрудника, которого нет в загруженном JSON или исходном наборе.')
-    save({ ...dataset, employees: [...employees.values()].sort((a, b) => a.employee_id.localeCompare(b.employee_id)), activities: [...dataset.activities, ...newActivities] })
+    if (incomingActivities.some((item) => !employees.has(item.employee_id))) throw new Error('История содержит сотрудника, которого нет в загруженном JSON или исходном наборе.')
+    const importedIds = new Set(incomingEmployees.map((item) => item.employee_id))
+    const activities = dataset.activities.filter((item) => !importedIds.has(item.employee_id))
+    const seenRecords = new Set(activities.map((item) => item.record_id))
+    incomingActivities.forEach((item) => {
+      if (!seenRecords.has(item.record_id)) { activities.push(item); seenRecords.add(item.record_id) }
+    })
+    save({ ...dataset, employees: [...employees.values()].sort((a, b) => a.employee_id.localeCompare(b.employee_id)), activities })
     return incomingEmployees.length
   }
 
-  const value = useMemo(() => ({ dataset, loading, error, completeActivity, importSupplemental }), [dataset, loading, error])
+  const value = { dataset, loading, error, completeActivity, importSupplemental }
   return <CareerDataContext.Provider value={value}>{children}</CareerDataContext.Provider>
-}
-
-export function useCareerData() {
-  const context = useContext(CareerDataContext)
-  if (!context) throw new Error('useCareerData must be used inside CareerDataProvider')
-  return context
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useCareerData } from '../context/CareerDataContext'
-import { getProgress, getRecommendations } from '../services/careerData'
+import { useCareerData } from '../context/careerDataStore'
+import { formatRussianCount, getProgress, getRecommendations } from '../services/careerData'
 import type { Event, Recommendation } from '../types/career'
 
 const initials = (name: string) => name.split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase()
@@ -46,12 +46,13 @@ export function EmployeeProfilePage() {
         <div className="notice">Расчёт прогресса сравнивает оценённые навыки с требованиями следующего грейда. Завершённая активность обновляет навыки по правилам из каталога.</div>
       </div>
     </div>
-    {confirmEvent && <div className="modal-backdrop" role="presentation"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="completion-title"><h2 id="completion-title">Отметить активность выполненной?</h2><p><strong>{confirmEvent.title}</strong></p><p>Уровень навыка обновится по данным активности, но не превысит `max_level`. Изменение сохранится в этом браузере.</p><div className="modal-actions"><button className="btn" onClick={() => setConfirmEvent(null)}>Отмена</button><button className="btn btn-primary" onClick={confirmCompletion}>Подтвердить</button></div></div></div>}
+    {confirmEvent && <div className="modal-backdrop" role="presentation"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="completion-title"><h2 id="completion-title">Отметить активность выполненной?</h2><p><strong>{confirmEvent.title}</strong></p><p>Уровень навыка обновится по данным активности с учётом максимума из каталога. Изменение сохранится в этом браузере.</p><div className="modal-actions"><button className="btn" onClick={() => setConfirmEvent(null)}>Отмена</button><button className="btn btn-primary" onClick={confirmCompletion}>Подтвердить</button></div></div></div>}
     {toast && <div className="toast">✓ {toast}</div>}
   </>
 }
 
 function RecommendationCard({ recommendation, onComplete }: { recommendation: Recommendation; onComplete: () => void }) {
   const { event, reasons, impacts } = recommendation
-  return <article className="recommendation-entry"><div className="recommendation-banner"><div className="recommendation-kicker">Рекомендуемый шаг</div><h3 className="recommendation-title">{event.title}</h3><div className="recommendation-meta"><span>{event.format === 'self_paced' ? 'В своём темпе' : event.format === 'online' ? 'Онлайн' : 'Офлайн'}</span><span>◷ {event.duration_hours} ч</span><span>↗ +{impacts.reduce((sum, impact) => sum + impact.after - impact.current, 0)} к навыкам</span></div></div><div className="reasons">{reasons.slice(0, 4).map((reason, index) => <div className="reason" key={`${reason.label}-${index}`}><span className="reason-icon">{reason.icon}</span><div><strong>{reason.label}</strong><p>{reason.detail}</p></div></div>)}</div><div className="recommendation-foot"><span className="card-caption">{impacts.map((impact) => impact.skill.name).join(', ') || 'Развивающая активность'}</span><button className="btn btn-primary" onClick={onComplete}>Отметить выполненной</button></div></article>
+  const totalGain = impacts.reduce((sum, impact) => sum + impact.after - impact.current, 0)
+  return <article className="recommendation-entry"><div className="recommendation-banner"><div className="recommendation-kicker">Рекомендуемый шаг</div><h3 className="recommendation-title">{event.title}</h3><div className="recommendation-meta"><span>{event.format === 'self_paced' ? 'В своём темпе' : event.format === 'online' ? 'Онлайн' : 'Офлайн'}</span><span>◷ {event.duration_hours} ч</span><span>↗ +{formatRussianCount(totalGain, ['уровень навыка', 'уровня навыков', 'уровней навыков'])}</span></div></div><div className="reasons">{reasons.slice(0, 4).map((reason, index) => <div className="reason" key={`${reason.label}-${index}`}><span className="reason-icon">{reason.icon}</span><div><strong>{reason.label}</strong><p>{reason.detail}</p></div></div>)}</div><div className="recommendation-foot"><span className="card-caption">{impacts.map((impact) => impact.skill.name).join(', ') || 'Развивающая активность'}</span><button className="btn btn-primary" onClick={onComplete}>Отметить выполненной</button></div></article>
 }
