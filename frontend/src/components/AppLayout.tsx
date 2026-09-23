@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import { NavLink } from 'react-router-dom'
-import { useCareerData } from '../context/CareerDataContext'
+import { useCareerData } from '../context/careerDataStore'
 import '../App.css'
 
 export function AppLayout({ children }: PropsWithChildren) {
