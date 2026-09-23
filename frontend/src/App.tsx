@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ApiSessionProvider } from './context/ApiSessionContext'
 import { useApiSession } from './context/useApiSession'
 import { AppLayout } from './components/AppLayout'
-import { ApiContentPage, LoginPage } from './pages/ApiPages'
+import { HrContentPage, LoginPage } from './pages/HrPages'
 
 function ApplicationRoutes() {
   const { token, user } = useApiSession()
@@ -10,10 +10,10 @@ function ApplicationRoutes() {
   return <Routes>
     <Route path="/login" element={isHr ? <Navigate to="/hr" replace /> : <LoginPage />} />
     <Route path="*" element={isHr ? <AppLayout><Routes>
-      <Route path="/hr" element={<ApiContentPage />} />
-      <Route path="/hr/skill-gaps" element={<ApiContentPage />} />
-      <Route path="/hr/no-next-step" element={<ApiContentPage />} />
-      <Route path="/hr/participation" element={<ApiContentPage />} />
+      <Route path="/hr" element={<HrContentPage />} />
+      <Route path="/hr/skill-gaps" element={<HrContentPage />} />
+      <Route path="/hr/no-next-step" element={<HrContentPage />} />
+      <Route path="/hr/participation" element={<HrContentPage />} />
       <Route path="*" element={<Navigate to="/hr" replace />} />
     </Routes></AppLayout> : <Navigate to="/login" replace />} />
   </Routes>

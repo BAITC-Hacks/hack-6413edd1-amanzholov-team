@@ -2,13 +2,15 @@ import { useEffect, type PropsWithChildren } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useApiSession } from '../context/useApiSession'
 import { apiRequest, asRecord } from '../services/api'
+import { HrIcon } from './HrIcon'
 import '../App.css'
+import '../HrPortal.css'
 
 const hrNavigation = [
-  ['/hr', '▥', 'Обзор команды'],
-  ['/hr/skill-gaps', '◇', 'Разрывы навыков'],
-  ['/hr/no-next-step', '↗', 'Нет следующего шага'],
-  ['/hr/participation', '◷', 'Участие в обучении'],
+  ['/hr', 'overview', 'Обзор команды'],
+  ['/hr/skill-gaps', 'skills', 'Развитие навыков'],
+  ['/hr/no-next-step', 'support', 'Поддержка сотрудников'],
+  ['/hr/participation', 'learning', 'Обучение команды'],
 ] as const
 
 export function AppLayout({ children }: PropsWithChildren) {
@@ -35,14 +37,14 @@ export function AppLayout({ children }: PropsWithChildren) {
     return () => { active = false }
   }, [navigate, signOut, token])
 
-  return <div className="app-shell">
+  return <div className="app-shell hr-shell">
     <aside className="sidebar">
       <NavLink className="brand" to="/hr"><span className="brand-mark">✦</span><span>career<span className="brand-light">quest</span></span></NavLink>
-      <div className="role-switch"><span className="role-option active">HR-кабинет</span><button className="role-option role-button" onClick={() => void signOut().then(() => navigate('/login'))}>Выйти</button></div>
+      <p className="hr-workspace">Пространство развития команды</p>
       <div className="workspace-label">УПРАВЛЕНИЕ КОМАНДОЙ</div>
-      <nav className="side-nav" aria-label="Навигация HR">{hrNavigation.map(([to, icon, text]) => <NavLink key={to} to={to} end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}><span className="nav-icon">{icon}</span>{text}</NavLink>)}</nav>
-      <div className="sidebar-bottom"><div className="demo-badge"><span className="status-dot"/>HR-портал</div><div className="sidebar-caption">Аналитика и данные команды<br />из Career Quest API.</div></div>
+      <nav className="side-nav" aria-label="Навигация HR">{hrNavigation.map(([to, icon, text]) => <NavLink key={to} to={to} end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}><HrIcon name={icon} className="nav-icon" />{text}</NavLink>)}</nav>
+      <div className="sidebar-bottom"><div className="hr-account"><div className="avatar">{initials}</div><div className="hr-account-copy"><strong>HR-кабинет</strong><span>Управление командой</span></div></div><button className="hr-logout" onClick={() => void signOut().then(() => navigate('/login'))}><HrIcon name="logout" />Выйти из кабинета</button></div>
     </aside>
-    <main className="main-shell"><header className="topbar"><div className="breadcrumb">Career Quest <span>›</span> <strong>{label}</strong></div><div className="topbar-right"><span className="dataset-status">HR · Backend API</span><div className="avatar">{initials}</div></div></header><div className="content-area">{children}</div></main>
+    <main className="main-shell" id="main-content"><header className="topbar"><div className="breadcrumb">HR-кабинет <span>›</span> <strong>{label}</strong></div><div className="topbar-right"><span className="dataset-status">Развитие команды</span><div className="avatar">{initials}</div></div></header><div className="content-area">{children}</div></main>
   </div>
 }
