@@ -1,0 +1,15 @@
+.env
+.venv/
+.tools/
+.tools-packages/
+.test-postgres/
+.uv-cache/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+*.egg-info/
+dist/
+.coverage
+
