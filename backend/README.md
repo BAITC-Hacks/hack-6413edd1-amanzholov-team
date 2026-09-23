@@ -99,13 +99,30 @@ HTTP: `POST /api/v1/admin/imports?source=canonical&dry_run=true`, multipart по
 Без `LLM_ENDPOINT` режим — `rule_based_fallback`, причина — `ai_disabled`.
 Для локального OpenAI-compatible сервиса задайте URL с `/v1`, модель и при
 необходимости ключ. HTTP-адаптер обращается к `/chat/completions`. В контейнере
-`127.0.0.1` означает сам контейнер; адрес другого сервиса должен быть явно
-разрешён конфигурацией `ALLOW_EXTERNAL_AI=true`. Такой opt-in необходим для
-любого адреса вне loopback. Внешние адреса требуют HTTPS. Персональные поля,
+`127.0.0.1` означает сам контейнер. Локальными также считаются точные адреса
+`model-runner.docker.internal` и `host.docker.internal`. Остальные адреса
+требуют `ALLOW_EXTERNAL_AI=true` и HTTPS. Персональные поля,
 evidence и архив в AI не передаются. AI может только переставить проверенные
 кандидаты и сослаться на существующие факты; ошибка/тайм-аут дают fallback.
 Вызов ограничен 3 секундами по умолчанию, максимум 5; транзакция на время
 ожидания закрыта. Перед сохранением проверяются версии.
+
+Живая проверка через Docker Desktop Model Runner:
+
+```powershell
+docker model pull ai/smollm2:360M-Q4_K_M
+docker compose -f compose.yaml -f compose.ai.yaml up --build -d --wait
+Get-Content -Raw scripts/smoke_ai.py | docker compose -f compose.yaml -f compose.ai.yaml exec -T api uv run --no-sync python -
+if ($LASTEXITCODE -ne 0) { throw 'Live AI smoke test failed.' }
+```
+
+`compose.ai.yaml` включает `LLM_RESPONSE_FORMAT=json_schema`: схема ограничивает
+ID событий и фактов. Поддержка схемы зависит от AI-сервера. Режим по умолчанию
+`json_object` сохранён для совместимости. Проверка использует только
+синтетические факты; при fallback скрипт завершится ненулевым кодом.
+SmolLM2 360M используется для smoke-теста, а не как рекомендация модели для
+рабочей эксплуатации. При холодном старте возможен корректный `ai_timeout`.
+[Результаты проверки Docker и живого AI](docs/docker-ai-validation.md).
 
 ## Проверки
 
@@ -136,9 +153,11 @@ uv run pytest
 uv run python scripts/benchmark.py
 ```
 
-Скрипт работает только с `*_test`, создаёт локальную тестовую учётную запись
+Скрипт работает только с `*_test`, повторяемо импортирует исходный набор,
+создаёт локальную тестовую учётную запись
 с временным случайным паролем и сохраняет измерения в
 `docs/benchmark-results.md`. Он не предназначен для рабочей БД.
 
 Подробности: [архитектура](docs/architecture.md),
-[допущения](docs/assumptions.md), [демонстрация](docs/demo.md).
+[допущения](docs/assumptions.md), [демонстрация](docs/demo.md),
+[выполненные проверки](docs/validation.md).

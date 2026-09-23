@@ -11,6 +11,8 @@ from pydantic import (
     model_validator,
 )
 
+from career_quest.shared.domain.core import Json
+
 type Level = Annotated[StrictInt, Field(ge=0, le=5)]
 type Text = Annotated[str, Field(min_length=3, max_length=4000)]
 
@@ -31,6 +33,18 @@ class Preferences(Command):
 
 
 class SkillClaim(Command):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "examples": [
+                {
+                    "skill_id": "00000000-0000-0000-0000-000000000001",
+                    "claimed_level": 3,
+                    "evidence": "Описание выполненного задания",
+                }
+            ]
+        },
+    )
     skill_id: UUID
     claimed_level: Level
     evidence: Text
@@ -128,3 +142,10 @@ class SimulationInput(Command):
 class Page(BaseModel):
     offset: Annotated[int, Field(ge=0, le=100000)] = 0
     limit: Annotated[int, Field(ge=1, le=100)] = 50
+
+
+class ErrorResponse(BaseModel):
+    code: str
+    message: str
+    details: dict[str, Json]
+    request_id: str

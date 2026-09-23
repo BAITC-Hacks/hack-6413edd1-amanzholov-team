@@ -92,3 +92,46 @@ def test_external_ai_requires_opt_in_and_demo_production_is_rejected() -> None:
         Settings(llm_endpoint="https://external.example/v1")
     with pytest.raises(ValueError):
         Settings(environment="production", demo_auth=True)
+
+
+@pytest.mark.parametrize(
+    "host",
+    [
+        "model-runner.docker.internal",
+        "host.docker.internal",
+    ],
+)
+def test_docker_local_ai_without_external_opt_in(host: str) -> None:
+    settings = Settings(llm_endpoint=f"http://{host}/engines/v1")
+    assert settings.allow_external_ai is False
+
+
+def test_docker_lookalike_is_not_local() -> None:
+    with pytest.raises(ValueError):
+        Settings(llm_endpoint="http://model-runner.docker.internal.example/v1")
+
+
+async def test_structured_format_limits_ids_and_facts() -> None:
+    async with httpx.AsyncClient() as client:
+        gateway = HttpLlmGateway(
+            client, Settings(llm_response_format="json_schema")
+        )
+        result = gateway.response_format(
+            {
+                "facts": {"grade": "Junior", "gap": 2, "goal": 3},
+                "candidates": [{"event_id": "synthetic-allowed"}],
+            }
+        )
+        assert result["type"] == "json_schema"
+        schema = result["json_schema"]["schema"]
+        selection = schema["properties"]["selections"]
+        assert selection["minItems"] == selection["maxItems"] == 1
+        properties = selection["items"]["properties"]
+        assert properties["event_id"]["enum"] == ["synthetic-allowed"]
+        assert properties["fact_ids"]["items"]["enum"] == [
+            "grade",
+            "gap",
+            "goal",
+        ]
+        with pytest.raises(ValueError):
+            gateway.response_format({"facts": {}, "candidates": []})

@@ -207,6 +207,13 @@ async def ranked(
             == {c.activity_id for c in fallback},
             "ai_policy_violation",
         )
+        require(
+            all(
+                first.critical_gain >= second.critical_gain
+                for first, second in zip(chosen, chosen[1:], strict=False)
+            ),
+            "ai_policy_violation",
+        )
         return chosen, "llm_ranked", "validated_ai_ranking"
     except TimeoutError:
         return fallback, "rule_based_fallback", "ai_timeout"

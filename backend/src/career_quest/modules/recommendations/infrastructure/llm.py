@@ -10,6 +10,61 @@ class HttpLlmGateway:
     def __init__(self, client: httpx.AsyncClient, settings: Settings) -> None:
         self.client, self.settings = client, settings
 
+    def response_format(self, facts: dict[str, Json]) -> dict[str, Json]:
+        if self.settings.llm_response_format == "json_object":
+            return {"type": "json_object"}
+        candidates = facts.get("candidates")
+        source_facts = facts.get("facts")
+        if not isinstance(candidates, list) or not isinstance(
+            source_facts, dict
+        ):
+            raise ValueError("Ranking requires candidates and facts")
+        event_ids: list[Json] = [
+            c["event_id"]
+            for c in candidates[:3]
+            if isinstance(c, dict) and isinstance(c.get("event_id"), str)
+        ]
+        if not event_ids or len(source_facts) < 3:
+            raise ValueError("Insufficient ranking facts")
+        selection: dict[str, Json] = {
+            "type": "object",
+            "properties": {
+                "event_id": {"type": "string", "enum": event_ids},
+                "fact_ids": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": {"type": "string", "enum": list(source_facts)},
+                },
+                "reason_code": {
+                    "type": "string",
+                    "enum": ["target_gap_reduction"],
+                },
+            },
+            "required": ["event_id", "fact_ids", "reason_code"],
+            "additionalProperties": False,
+        }
+        return {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "career_ranking",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "selections": {
+                            "type": "array",
+                            "items": selection,
+                            "minItems": len(event_ids),
+                            "maxItems": len(event_ids),
+                        }
+                    },
+                    "required": ["selections"],
+                    "additionalProperties": False,
+                },
+            },
+        }
+
     async def rank(self, facts: dict[str, Json]) -> dict[str, Json]:
         if not self.settings.llm_endpoint:
             return {"disabled": True}
@@ -25,7 +80,7 @@ class HttpLlmGateway:
                 "model": self.settings.llm_model,
                 "temperature": 0,
                 "max_tokens": 600,
-                "response_format": {"type": "json_object"},
+                "response_format": self.response_format(facts),
                 "messages": [
                     {
                         "role": "system",

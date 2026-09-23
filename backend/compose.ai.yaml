@@ -1,0 +1,10 @@
+# Optional live smoke test with Docker Desktop Model Runner.
+# First: docker model pull ai/smollm2:360M-Q4_K_M
+services:
+  api:
+    environment:
+      LLM_ENDPOINT: http://model-runner.docker.internal/engines/v1
+      LLM_MODEL: ai/smollm2:360M-Q4_K_M
+      LLM_TIMEOUT_SECONDS: "3"
+      LLM_RESPONSE_FORMAT: json_schema
+      ALLOW_EXTERNAL_AI: "false"
