@@ -1,5 +1,9 @@
 # Career Quest
 
+Hackathon team repository for Amanzholov team
+
+test
+
 Локальный frontend MVP платформы развития сотрудников. Приложение построено на React, TypeScript и Vite и сейчас запускается без backend, используя стартовый синтетический набор данных.
 
 ## Запустить
