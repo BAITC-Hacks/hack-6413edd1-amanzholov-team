@@ -5,6 +5,8 @@ export type CareerContextValue = {
   dataset: CareerDataset | null
   loading: boolean
   error: string | null
+  selectedEmployeeId: string | null
+  selectEmployee: (employeeId: string) => void
   completeActivity: (employeeId: string, eventId: string) => void
   importSupplemental: (employeesFile: File, historyFile: File) => Promise<number>
 }

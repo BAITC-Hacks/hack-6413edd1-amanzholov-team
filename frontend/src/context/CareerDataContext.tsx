@@ -1,11 +1,13 @@
-import { useEffect, useState, type PropsWithChildren } from 'react'
+import { useCallback, useEffect, useState, type PropsWithChildren } from 'react'
 import { loadDataset, parseCsv } from '../services/careerData'
 import type { Activity, CareerDataset, Employee } from '../types/career'
 import { CareerDataContext } from './careerDataStore'
 const storageKey = 'career-quest-local-dataset-v1'
+const selectedEmployeeStorageKey = 'career-quest-selected-employee-v1'
 
 export function CareerDataProvider({ children }: PropsWithChildren) {
   const [dataset, setDataset] = useState<CareerDataset | null>(null)
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -14,7 +16,11 @@ export function CareerDataProvider({ children }: PropsWithChildren) {
     loadDataset().then((loaded) => {
       const saved = localStorage.getItem(storageKey)
       const restored = saved ? JSON.parse(saved) as CareerDataset : loaded
-      if (active) { setDataset(restored); setError(null) }
+      const savedEmployeeId = localStorage.getItem(selectedEmployeeStorageKey)
+      const initialEmployeeId = restored.employees.some((employee) => employee.employee_id === savedEmployeeId)
+        ? savedEmployeeId
+        : restored.employees[0]?.employee_id ?? null
+      if (active) { setDataset(restored); setSelectedEmployeeId(initialEmployeeId); setError(null) }
     }).catch((reason: unknown) => {
       if (active) setError(reason instanceof Error ? reason.message : 'Не удалось загрузить данные.')
     }).finally(() => { if (active) setLoading(false) })
@@ -25,6 +31,12 @@ export function CareerDataProvider({ children }: PropsWithChildren) {
     setDataset(updated)
     localStorage.setItem(storageKey, JSON.stringify(updated))
   }
+
+  const selectEmployee = useCallback((employeeId: string) => {
+    if (!dataset?.employees.some((employee) => employee.employee_id === employeeId)) return
+    setSelectedEmployeeId(employeeId)
+    localStorage.setItem(selectedEmployeeStorageKey, employeeId)
+  }, [dataset])
 
   const completeActivity = (employeeId: string, eventId: string) => {
     if (!dataset) return
@@ -70,6 +82,6 @@ export function CareerDataProvider({ children }: PropsWithChildren) {
     return incomingEmployees.length
   }
 
-  const value = { dataset, loading, error, completeActivity, importSupplemental }
+  const value = { dataset, loading, error, selectedEmployeeId, selectEmployee, completeActivity, importSupplemental }
   return <CareerDataContext.Provider value={value}>{children}</CareerDataContext.Provider>
 }
