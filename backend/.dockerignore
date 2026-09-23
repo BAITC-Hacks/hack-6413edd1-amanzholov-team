@@ -1,0 +1,14 @@
+.env
+.venv
+.tools
+.tools-packages
+.test-postgres
+.uv-cache
+.pytest_cache
+.mypy_cache
+.ruff_cache
+__pycache__
+*.log
+tests
+docs
+scripts
