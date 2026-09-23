@@ -1,58 +1,48 @@
 import { useEffect, type PropsWithChildren } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-import { useCareerData } from '../context/careerDataStore'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useApiSession } from '../context/useApiSession'
+import { apiRequest, asRecord } from '../services/api'
 import '../App.css'
 
+const hrNavigation = [
+  ['/hr', '▥', 'Обзор команды'],
+  ['/hr/skill-gaps', '◇', 'Разрывы навыков'],
+  ['/hr/no-next-step', '↗', 'Нет следующего шага'],
+  ['/hr/participation', '◷', 'Участие в обучении'],
+] as const
+
 export function AppLayout({ children }: PropsWithChildren) {
-  const { loading, error, dataset, selectedEmployeeId, selectEmployee } = useCareerData()
+  const { token, user, signOut } = useApiSession()
   const location = useLocation()
-  const isOverview = location.pathname === '/overview'
-  const profileMatch = location.pathname.match(/^\/employees\/([^/]+)$/)
-  const profileEmployeeId = profileMatch?.[1]
-  const selectedEmployee = dataset?.employees.find((employee) => employee.employee_id === (profileEmployeeId ?? selectedEmployeeId)) ?? dataset?.employees[0]
-  const isEmployeePortal = isOverview || Boolean(profileEmployeeId)
-  const isHrPortal = location.pathname === '/hr' || location.pathname === '/employees'
-  const profilePath = selectedEmployee ? `/employees/${selectedEmployee.employee_id}` : '/employees'
-  const navLink = (to: string, icon: string, label: string, active: boolean) => <NavLink to={to} end className={`nav-link${active ? ' active' : ''}`} key={`${to}-${label}`}><span className="nav-icon">{icon}</span>{label}</NavLink>
+  const navigate = useNavigate()
+  const label = hrNavigation.find(([path]) => path === location.pathname)?.[2] ?? 'Обзор команды'
+  const initials = user?.login?.slice(0, 2).toUpperCase() ?? 'HR'
 
   useEffect(() => {
-    if (profileEmployeeId && dataset?.employees.some((employee) => employee.employee_id === profileEmployeeId) && profileEmployeeId !== selectedEmployeeId) {
-      selectEmployee(profileEmployeeId)
-    }
-  }, [dataset, profileEmployeeId, selectedEmployeeId, selectEmployee])
+    // Local HR preview is for shell/navigation only and must survive backend 401s.
+    if (token === 'preview-only') return
+    let active = true
+    void apiRequest('/me', { token }).then((data) => {
+      const currentUser = asRecord(asRecord(data).user)
+      if (active && currentUser.role !== 'hr') {
+        void signOut().then(() => navigate('/login', { replace: true }))
+      }
+    }).catch((error: unknown) => {
+      if (active && error instanceof Error && 'status' in error && (error as { status: number }).status === 401) {
+        void signOut().then(() => navigate('/login', { replace: true }))
+      }
+    })
+    return () => { active = false }
+  }, [navigate, signOut, token])
 
-  const pageLabel = isOverview ? 'Обзор'
-    : location.pathname === '/hr' ? 'Обзор команды'
-      : location.pathname === '/employees' ? 'Сотрудники'
-        : location.hash === '#career-path' ? 'Карьерный путь'
-          : location.hash === '#activities' ? 'Мои активности'
-            : location.hash === '#history' ? 'История обучения'
-              : 'Профиль сотрудника'
-  const initials = selectedEmployee?.full_name.split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase() ?? 'CQ'
-
-  return <div className={`app-shell${isOverview ? ' overview-shell' : ''}`}>
+  return <div className="app-shell">
     <aside className="sidebar">
-      <NavLink className="brand" to="/overview"><span className="brand-mark">✦</span><span>career<span className="brand-light">quest</span></span></NavLink>
-      {isOverview && <div className="brand-tagline">РАСТИ В СВОЁМ ТЕМПЕ</div>}
-      <div className="role-switch"><NavLink to="/overview" className={`role-option${isEmployeePortal ? ' active' : ''}`}>Сотрудник</NavLink><NavLink to="/hr" className={`role-option${isHrPortal ? ' active' : ''}`}>HR-кабинет</NavLink></div>
-      <div className="workspace-label">{isEmployeePortal ? 'МОЁ РАЗВИТИЕ' : 'УПРАВЛЕНИЕ КОМАНДОЙ'}</div>
-      <nav className="side-nav" aria-label="Основная навигация">
-        {isEmployeePortal ? <>
-          {navLink('/overview', '▦', 'Обзор', isOverview)}
-          {navLink(`${profilePath}#career-path`, '⌑', 'Карьерный путь', Boolean(profileEmployeeId) && location.hash === '#career-path')}
-          {navLink(`${profilePath}#activities`, '▤', 'Мои активности', Boolean(profileEmployeeId) && location.hash === '#activities')}
-          {navLink(`${profilePath}#history`, '◷', 'История обучения', Boolean(profileEmployeeId) && location.hash === '#history')}
-          {navLink(`${profilePath}#profile`, '♙', 'Мой профиль', Boolean(profileEmployeeId) && (!location.hash || location.hash === '#profile'))}
-        </> : <>
-          {navLink('/hr', '▥', 'Обзор команды', location.pathname === '/hr')}
-          {navLink('/employees', '♙', 'Сотрудники', location.pathname === '/employees')}
-        </>}
-      </nav>
-      <div className="sidebar-bottom">{isOverview && <div className="sidebar-prompt"><span>✧</span><strong>Большие цели. Маленькие шаги.</strong><p>Ваш следующий уровень начинается с одной новой привычки.</p><NavLink to="/employees">Как работает подбор <b>→</b></NavLink></div>}<div className="demo-badge"><span className="status-dot"/>Локальный режим</div><div className="sidebar-caption">Данные доступны в этом браузере<br/>без подключения к серверу.</div></div>
+      <NavLink className="brand" to="/hr"><span className="brand-mark">✦</span><span>career<span className="brand-light">quest</span></span></NavLink>
+      <div className="role-switch"><span className="role-option active">HR-кабинет</span><button className="role-option role-button" onClick={() => void signOut().then(() => navigate('/login'))}>Выйти</button></div>
+      <div className="workspace-label">УПРАВЛЕНИЕ КОМАНДОЙ</div>
+      <nav className="side-nav" aria-label="Навигация HR">{hrNavigation.map(([to, icon, text]) => <NavLink key={to} to={to} end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}><span className="nav-icon">{icon}</span>{text}</NavLink>)}</nav>
+      <div className="sidebar-bottom"><div className="demo-badge"><span className="status-dot"/>HR-портал</div><div className="sidebar-caption">Аналитика и данные команды<br />из Career Quest API.</div></div>
     </aside>
-    <main className="main-shell">
-      <header className="topbar"><div className="breadcrumb">{isEmployeePortal ? <>Моё развитие <span>›</span> <strong>{pageLabel}</strong></> : <>HR-кабинет <span>›</span> <strong>{pageLabel}</strong></>}</div><div className="topbar-right"><span className="dataset-status">{loading ? 'Загрузка данных…' : error ? 'Ошибка данных' : `${dataset?.employees.length ?? 0} сотрудников`}</span><div className="avatar">{initials}</div></div></header>
-      <div className="content-area">{children}</div>
-    </main>
+    <main className="main-shell"><header className="topbar"><div className="breadcrumb">Career Quest <span>›</span> <strong>{label}</strong></div><div className="topbar-right"><span className="dataset-status">HR · Backend API</span><div className="avatar">{initials}</div></div></header><div className="content-area">{children}</div></main>
   </div>
 }
