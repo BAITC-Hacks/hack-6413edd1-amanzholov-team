@@ -228,13 +228,17 @@ async def appeal(
 
 @router.post("/verification-requests/{request_id}/submit")
 async def submit(
-    request_id: UUID, actor: Actor, app: App, key: IdempotencyKey
+    request_id: UUID,
+    body: Command,
+    actor: Actor,
+    app: App,
+    key: IdempotencyKey,
 ) -> dict[str, Json]:
     return await command(
         app,
         actor,
         f"submit:{request_id}",
         key,
-        Command(),
+        body,
         lambda store: submit_draft(store, actor, request_id),
     )

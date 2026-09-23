@@ -120,6 +120,17 @@ def map_result(ctx: CareerContext) -> dict[str, Json]:
         if result.coverage is not None
         else None,
         "ready_for_review": result.ready_for_review,
+        "requirements": [
+            {
+                "skill_id": str(r.skill_id),
+                "verified_level": ctx.levels.get(r.skill_id, 0),
+                "required_level": r.level,
+                "critical": r.critical,
+                "satisfied": ctx.levels.get(r.skill_id, 0) >= r.level,
+            }
+            for r in ctx.requirements
+            if r.level > 0
+        ],
         "reason_code": ctx.reason
         if ctx.target_id is None or ctx.reason == "vacancy_closed"
         else result.reason_code,

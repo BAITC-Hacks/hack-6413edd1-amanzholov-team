@@ -12,7 +12,11 @@ from career_quest.shared.presentation.dependencies import (
     ReadStore,
     command,
 )
-from career_quest.shared.presentation.schemas import Login, Preferences
+from career_quest.shared.presentation.schemas import (
+    Command,
+    Login,
+    Preferences,
+)
 
 router = APIRouter(tags=["identity"])
 
@@ -25,7 +29,9 @@ async def login(body: Login, app: App, request: Request) -> dict[str, Json]:
 
 
 @router.post("/auth/logout")
-async def logout(actor: Actor, app: App, request: Request) -> dict[str, Json]:
+async def logout(
+    body: Command, actor: Actor, app: App, request: Request
+) -> dict[str, Json]:
     await app.auth.logout(request.headers["authorization"].split(" ", 1)[1])
     return {"revoked": True}
 

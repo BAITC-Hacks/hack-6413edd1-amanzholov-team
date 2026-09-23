@@ -15,6 +15,8 @@ from career_quest.bootstrap import database_factory
 from career_quest.infrastructure.authentication.passwords import ArgonPasswords
 from career_quest.infrastructure.settings import Settings
 from career_quest.main import create_app
+from career_quest.modules.data_import.application.importer import ImportDataset
+from career_quest.modules.data_import.infrastructure.parser import read_directory
 from career_quest.modules.identity.domain.models import User
 from career_quest.modules.people.domain.models import Employee
 
@@ -28,6 +30,10 @@ async def run() -> str:
     settings = Settings(environment="test", database_url=SecretStr(url))
     engine, factory = database_factory(settings)
     password = secrets.token_urlsafe(32)
+    package = await asyncio.to_thread(
+        read_directory, ROOT.parent / "frontend/public/data"
+    )
+    await ImportDataset(factory).execute(package, "canonical", None)
     async with factory() as uow:
         employees = await uow.store.find(Employee, source="canonical")
         if len(employees) < 200:

@@ -36,6 +36,7 @@ from career_quest.modules.recommendations.presentation.routes import (
 )
 from career_quest.shared.domain.core import BusinessError, DatasetClock
 from career_quest.shared.presentation.localization import message
+from career_quest.shared.presentation.schemas import ErrorResponse
 
 logger = logging.getLogger("career_quest")
 
@@ -198,7 +199,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         hr,
         imports,
     ]:
-        app.include_router(router, prefix="/api/v1")
+        app.include_router(
+            router,
+            prefix="/api/v1",
+            responses={
+                status: {"model": ErrorResponse}
+                for status in [401, 403, 404, 409, 422, 429, 500]
+            },
+        )
     return app
 
 

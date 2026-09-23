@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 from urllib.parse import urlparse
 
 from pydantic import SecretStr, model_validator
@@ -19,6 +20,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173"]
     llm_endpoint: str | None = None
     llm_model: str = "local-model"
+    llm_response_format: Literal["json_object", "json_schema"] = "json_object"
     llm_api_key: SecretStr | None = None
     allow_external_ai: bool = False
     llm_timeout_seconds: float = 3.0
@@ -39,7 +41,13 @@ class Settings(BaseSettings):
             raise ValueError("Token lifetime must be within 1..24 hours")
         if self.llm_endpoint:
             url = urlparse(self.llm_endpoint)
-            local = url.hostname in {"localhost", "127.0.0.1", "::1"}
+            local = url.hostname in {
+                "localhost",
+                "127.0.0.1",
+                "::1",
+                "model-runner.docker.internal",
+                "host.docker.internal",
+            }
             if (
                 url.scheme not in {"http", "https"}
                 or url.username
