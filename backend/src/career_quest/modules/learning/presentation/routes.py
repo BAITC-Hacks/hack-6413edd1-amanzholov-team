@@ -8,7 +8,11 @@ from career_quest.modules.learning.application.activities import (
     enroll,
     request_completion,
 )
-from career_quest.modules.learning.domain.models import Activity, Enrollment
+from career_quest.modules.learning.domain.models import (
+    Activity,
+    CompletionRequest,
+    Enrollment,
+)
 from career_quest.shared.application.commands import public
 from career_quest.shared.domain.core import Json
 from career_quest.shared.presentation.dependencies import (
@@ -97,6 +101,24 @@ async def enrollment(
         lambda store: enroll(
             store, actor, activity_id, body.session_id, today
         ),
+    )
+
+
+@router.get("/me/completion-requests")
+async def my_completion_requests(
+    actor: Actor, store: ReadStore, pagination: Pagination
+) -> dict[str, Json]:
+    enrollment_ids = {
+        e.id
+        for e in await store.find(Enrollment, employee_id=actor.employee_id)
+    }
+    return page(
+        [
+            public(r)
+            for r in await store.find(CompletionRequest)
+            if r.enrollment_id in enrollment_ids
+        ],
+        pagination,
     )
 
 

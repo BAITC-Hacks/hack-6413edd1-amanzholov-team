@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 /data/
+/docs/
 .env
 server.log
 server-error.log

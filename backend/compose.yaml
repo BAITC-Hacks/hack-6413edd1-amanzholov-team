@@ -7,6 +7,22 @@ x-app: &app
     DATABASE_URL: postgresql+asyncpg://career_quest:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/career_quest
 
 services:
+  mobile:
+    build: ../frontend/mobile
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  frontend:
+    build: ../frontend
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
   db:
     image: postgres:18.1
     environment:
@@ -25,6 +41,8 @@ services:
 
   bootstrap:
     <<: *app
+    volumes:
+      - ../frontend/public/data:/data/canonical:ro
     command: ["uv", "run", "--no-sync", "python", "-m", "career_quest.startup"]
     depends_on:
       db:

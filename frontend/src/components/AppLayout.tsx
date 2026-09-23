@@ -1,22 +1,23 @@
 import type { PropsWithChildren } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useCareerData } from '../context/careerDataStore'
+import { WorkspaceIcon as Icon } from './WorkspaceIcon'
 import '../App.css'
 
 export function AppLayout({ children }: PropsWithChildren) {
-  const { loading, error, dataset } = useCareerData()
+  const { loading, error, dataset, refresh, logout } = useCareerData()
   return <div className="app-shell">
     <aside className="sidebar">
       <NavLink className="brand" to="/employees"><span className="brand-mark">q</span><span>career<span className="brand-light">quest</span></span></NavLink>
-      <div className="workspace-label">WORKSPACE</div>
+      <div className="workspace-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
       <nav className="side-nav" aria-label="Основная навигация">
-        <NavLink to="/employees"><span className="nav-icon">◫</span>Развитие сотрудников</NavLink>
-        <NavLink to="/hr"><span className="nav-icon">▥</span>HR-аналитика</NavLink>
+        <NavLink to="/employees"><Icon name="users" width="18" height="18" />Сотрудники</NavLink>
+        <NavLink to="/hr"><Icon name="chart" width="18" height="18" />HR-аналитика</NavLink>
       </nav>
-      <div className="sidebar-bottom"><div className="demo-badge"><span className="status-dot"/>Локальный режим</div><div className="sidebar-caption">Данные доступны в этом браузере<br/>без подключения к серверу.</div></div>
+      <div className="sidebar-bottom"><div className="sidebar-workspace"><div className="sidebar-workspace-mark"><Icon name="users" /></div><div><div className="demo-badge"><span className="status-dot"/>HR-кабинет</div><div className="sidebar-caption">Развитие вашей команды</div></div></div><button className="sidebar-logout" disabled={loading} onClick={() => void logout()}><Icon name="logout" width="16" height="16" />Выйти из кабинета</button></div>
     </aside>
     <main className="main-shell">
-      <header className="topbar"><div className="breadcrumb">Career Quest <span>/</span> <strong>Платформа развития</strong></div><div className="topbar-right"><span className="dataset-status">{loading ? 'Загрузка данных…' : error ? 'Ошибка данных' : `${dataset?.employees.length ?? 0} сотрудников`}</span><div className="avatar">CQ</div></div></header>
+      <header className="topbar"><div className="breadcrumb">Рабочее пространство <span>/</span> <strong>Развитие команды</strong></div><div className="topbar-right"><button className="workspace-refresh" disabled={loading} onClick={() => void refresh()} aria-label="Обновить данные"><Icon name="refresh" width="15" height="15" /><span>{loading ? 'Обновление…' : 'Обновить данные'}</span></button><span className="dataset-status">{error ? 'Ошибка данных' : dataset ? 'HR Workspace' : 'Загрузка…'}</span><div className="avatar">HR</div></div></header>
       <div className="content-area">{children}</div>
     </main>
   </div>

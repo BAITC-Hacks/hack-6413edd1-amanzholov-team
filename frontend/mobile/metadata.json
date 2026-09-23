@@ -1,0 +1,6 @@
+{
+  "name": "Career Quest - Pixel Fantasy RPG Career System",
+  "description": "Premium 16-bit JRPG employee career progression app featuring 6 interactive screens, career skill tree, quest progression, verified skills ledger, and role readiness.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

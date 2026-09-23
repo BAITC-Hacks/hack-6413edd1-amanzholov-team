@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter
 
 from career_quest.modules.hr.application.analytics import employee_view, report
+from career_quest.modules.hr.application.dataset import workspace
 from career_quest.shared.domain.core import Json
 from career_quest.shared.presentation.dependencies import (
     Actor,
@@ -14,6 +15,13 @@ from career_quest.shared.presentation.dependencies import (
 )
 
 router = APIRouter(tags=["hr"])
+
+
+@router.get("/hr/workspace")
+async def hr_workspace(
+    actor: Actor, store: ReadStore, today: Today
+) -> dict[str, Json]:
+    return await workspace(store, actor, today)
 
 
 @router.get("/hr/employees/{employee_id}")

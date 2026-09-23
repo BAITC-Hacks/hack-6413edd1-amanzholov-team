@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-pixel: 'Pixelify Sans', cursive, monospace;
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #1a1714;
+    color: #ede2d3;
+  }
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.03em;
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stardew Valley Inspired Hand-Carved Wood & Parchment Panels */
+.wood-panel {
+  background: #28211b;
+  border: 3px solid #6b4324;
+  box-shadow: 
+    inset 2px 2px 0px #96673f,
+    inset -2px -2px 0px #3d2412,
+    0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.parchment-panel {
+  background: #fdf7eb;
+  color: #2b1f15;
+  border: 3px solid #8e653c;
+  box-shadow: 
+    inset 2px 2px 0px #fffdf7,
+    inset -2px -2px 0px #baa184,
+    0 4px 10px rgba(45, 30, 18, 0.25);
+}
+
+.cozy-card-dark {
+  background: #241e19;
+  border: 2px solid #543924;
+  box-shadow: 
+    inset 1px 1px 0px rgba(230, 200, 160, 0.08),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.5),
+    0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Stardew Button Tactile 3D Feel */
+.wood-btn {
+  background: linear-gradient(180deg, #d6953d 0%, #b87524 100%);
+  border: 2px solid #6e3e11;
+  color: #261605;
+  box-shadow: 
+    inset 1px 1px 0px #fedf9e,
+    inset -2px -2px 0px #7a4613,
+    0 3px 0px #3a1e05;
+}
+
+.wood-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e3a54d 0%, #c48231 100%);
+}
+
+.wood-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 1px 1px 0px #7a4613,
+    0 1px 0px #3a1e05;
+}
+
+/* Cozy Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #1b1714;
+}
+::-webkit-scrollbar-thumb {
+  background: #523926;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #735035;
+}
+
+/* Stardew Valley Cozy Ambient Floating Leaves & Dust Motes */
+@keyframes floatDustMote {
+  0% {
+    transform: translate(0, 0) scale(0.8);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(12px, -35px) scale(1.1);
+    opacity: 0.75;
+  }
+  85% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-10px, -70px) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes driftLeafFall {
+  0% {
+    transform: translate(0, -20px) rotate(0deg) scale(0.9);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  30% {
+    transform: translate(18px, 120px) rotate(45deg) scale(1);
+  }
+  60% {
+    transform: translate(-15px, 280px) rotate(110deg) scale(0.95);
+    opacity: 0.65;
+  }
+  85% {
+    transform: translate(22px, 450px) rotate(180deg) scale(0.9);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(5px, 620px) rotate(240deg) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes gentleSway {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(8px) translateY(-6px);
+  }
+}
+
+.animate-dust-mote {
+  animation: floatDustMote 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-leaf-fall {
+  animation: driftLeafFall 14s linear infinite;
+  will-change: transform, opacity;
+}
+
+/* Shared account controls for both employee presentation modes. */
+.employee-content { height:100dvh; }
+.employee-content > div { height:100%; }
+.employee-login { min-height:100dvh; display:grid; place-items:center; padding:24px; background:#f5f4ef; color:#16372d; }
+.employee-login form { width:min(100%, 400px); background:white; padding:28px; border-radius:18px; box-shadow:0 8px 35px #16372d15; display:grid; gap:18px; }
+.employee-login h1 { font-size:26px; font-weight:700; }
+.employee-login label { display:grid; gap:6px; }
+.employee-login input { width:100%; padding:10px; border:1px solid #b9c8bf; border-radius:7px; }
+.employee-login button { padding:10px 14px; background:#17634a; color:white; border-radius:8px; cursor:pointer; }
+.employee-notice { position:fixed; z-index:80; left:50%; top:12px; transform:translateX(-50%); width:min(94vw,420px); background:#fff9e7; color:#3d3020; border:1px solid #dac793; padding:14px; border-radius:10px; display:flex; gap:12px; box-shadow:0 4px 24px #0002; font-size:13px; }
+.employee-notice button { align-self:flex-start; font-size:22px; cursor:pointer; }
+.employee-loading { display:grid; place-items:center; background:#f5f4ef; color:#17392d; padding:24px; }
+.employee-busy { position:fixed; inset:0; z-index:60; background:#0003; display:grid; place-items:center; color:white; font-weight:700; pointer-events:all; }

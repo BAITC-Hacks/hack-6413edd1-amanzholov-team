@@ -45,3 +45,31 @@ h1 { margin-bottom: 8px; font-family: Manrope, sans-serif; font-size: clamp(26px
 @media(max-width:680px) { .attention-grid { grid-template-columns: 1fr; }.local-tag { align-self: flex-start; } }
 @media(max-width:1050px) { .sidebar { width: 205px; }.main-shell { margin-left: 205px; }.content-area { padding: 30px 26px 50px; }.topbar { padding: 0 26px; }.profile-grid { grid-template-columns: 1fr; }.stat-grid { grid-template-columns: repeat(2,1fr); } }
 @media(max-width:680px) { .sidebar { position: sticky; inset: 0 0 auto; z-index: 4; width: 100%; height: auto; padding: 12px 15px; border-right: 0; border-bottom: 1px solid var(--line); }.brand { font-size: 16px; }.workspace-label,.sidebar-bottom { display: none; }.side-nav { display: flex; margin-top: 12px; }.side-nav a { padding: 8px 10px; font-size: 10px; }.main-shell { margin-left: 0; }.topbar { height: 50px; padding: 0 16px; }.breadcrumb { font-size: 10px; }.content-area { padding: 24px 15px 42px; }.page-head { align-items: flex-start; flex-direction: column; }.page-head .btn { align-self: flex-start; }.stat-grid { gap: 9px; }.stat-card { padding: 13px; }.stat-value { font-size: 22px; }.search-row { align-items: stretch; flex-wrap: wrap; }.search-box { max-width: none; flex-basis: 100%; }.profile-top { align-items: flex-start; flex-direction: column; }.dashboard-grid { grid-template-columns: 1fr; }.table-footer { gap: 10px; }.table-footer span:last-child { text-align: right; }.profile-actions { width: 100%; }.profile-actions .btn { flex: 1; } }
+.login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-card { width: min(100%, 460px); display: grid; gap: 20px; }
+.login-card h1 { font-size: 28px; }
+.login-card input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font: inherit; }
+
+/* Workspace navigation */
+.sidebar { width: 224px; padding: 28px 16px 20px; }
+.main-shell { margin-left: 224px; }
+.brand { font-size: 19px; }
+.brand-mark { width: 33px; height: 33px; border-radius: 10px; background: #174e3b; }
+.workspace-label { margin: 43px 12px 15px; color: #8a978e; font-size: 9px; letter-spacing: .1em; }
+.side-nav a { min-height: 44px; gap: 12px; padding: 12px 14px; font-size: 12px; font-weight: 500; }
+.side-nav a.active { background: #eaf3ed; color: #216d48; font-weight: 650; }
+.side-nav svg { flex-shrink: 0; }
+.sidebar-bottom { padding: 18px 7px 0; border-top: 1px solid #ebeeeb; }
+.sidebar-workspace { display: flex; align-items: center; gap: 11px; }
+.sidebar-workspace-mark { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #e1e9e2; border-radius: 10px; color: #5c816a; background: #f5f8f5; }
+.sidebar-caption { margin-top: 5px; font-size: 9px; }
+.sidebar-logout { display: flex; align-items: center; gap: 9px; width: 100%; margin-top: 18px; padding: 8px 2px; border: 0; border-radius: 5px; background: transparent; color: #7b8980; font-size: 11px; text-align: left; }
+.sidebar-logout:hover { color: #286c48; }.sidebar-logout:disabled { opacity: .5; cursor: not-allowed; }
+.topbar { height: 70px; padding: 0 36px; }
+.content-area { max-width: 1530px; padding: 33px 36px 48px; }
+.workspace-refresh { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; color: #718477; font-size: 10px; }
+.workspace-refresh:hover:enabled { background: #f1f6f2; color: #256f49; }.workspace-refresh:disabled { opacity: .5; cursor: wait; }
+.topbar .avatar { width: 32px; height: 32px; border: 1px solid #dce9de; background: #eaf2ec; color: #467853; }
+.app-shell :is(a, button):focus-visible { outline: 2px solid #2d9463; outline-offset: 3px; }
+@media (max-width: 1100px) { .sidebar { width: 200px; }.main-shell { margin-left: 200px; }.topbar { padding: 0 24px; }.content-area { padding: 27px 24px 40px; }.breadcrumb { font-size: 10px; }.topbar-right { gap: 8px; }.dataset-status { display: none; } }
+@media (max-width: 680px) { .sidebar { width: 100%; padding: 14px 16px 10px; }.main-shell { margin-left: 0; }.brand { font-size: 18px; }.brand-mark { width: 30px; height: 30px; }.side-nav { margin-top: 13px; gap: 7px; }.side-nav a { min-height: 36px; padding: 8px 12px; font-size: 11px; }.topbar { position: static; height: 47px; padding: 0 17px; }.breadcrumb { font-size: 9px; }.breadcrumb span { margin: 0 5px; }.topbar-right { gap: 7px; }.topbar .avatar { width: 26px; height: 26px; font-size: 9px; }.workspace-refresh { min-width: 30px; padding: 4px; }.workspace-refresh span { display: none; }.content-area { padding: 25px 15px 36px; } }

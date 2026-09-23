@@ -5,8 +5,10 @@ export type CareerContextValue = {
   dataset: CareerDataset | null
   loading: boolean
   error: string | null
-  completeActivity: (employeeId: string, eventId: string) => void
-  importSupplemental: (employeesFile: File, historyFile: File) => Promise<number>
+  authenticated: boolean
+  login: (login: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  refresh: () => Promise<void>
 }
 
 export const CareerDataContext = createContext<CareerContextValue | null>(null)

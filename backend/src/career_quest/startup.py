@@ -6,6 +6,7 @@ from alembic.config import Config
 
 from career_quest.bootstrap import database_factory
 from career_quest.demo import seed
+from career_quest.hr_demo import initialize_hr
 from career_quest.infrastructure.settings import Settings
 
 
@@ -21,6 +22,9 @@ async def initialize() -> None:
                 settings.demo_password.get_secret_value(),
                 settings.business_date,
             )
+            canonical = Path("/data/canonical")
+            if await asyncio.to_thread(canonical.is_dir):
+                await initialize_hr(factory, canonical)
         finally:
             await engine.dispose()
 

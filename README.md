@@ -1,17 +1,55 @@
 # Career Quest
 
-Hackathon team repository for Amanzholov team
+Платформа развития сотрудников команды Amanzholov. В `frontend` находится
+HR-кабинет, в `frontend/mobile` — мобильный веб-интерфейс сотрудника.
+Оба приложения на React, TypeScript и Vite подключены к общему FastAPI
+и PostgreSQL.
 
-test
+## Запуск
 
-Локальный frontend MVP платформы развития сотрудников. Приложение построено на React, TypeScript и Vite и сейчас запускается без backend, используя стартовый синтетический набор данных.
+Нужны Docker Desktop с запущенным Docker Engine и PowerShell. При первом запуске
+скопируйте `backend/.env.example` в `backend/.env` и заполните
+`POSTGRES_PASSWORD`, `DATABASE_URL` и `DEMO_PASSWORD` (от 12 символов).
+Для демонстрации включите `DEMO_AUTH=true` и `DEMO_SEED=true`.
+Существующий `.env` перезаписывать не нужно.
 
-## Запустить
+Из корня репозитория:
 
 ```powershell
-cd frontend
-npm install
-npm run dev
+./start.ps1
 ```
 
-Подробности по локальному режиму, импорту проверочных профилей и расчёту рекомендаций — в [frontend/README.md](frontend/README.md).
+Или напрямую:
+
+```powershell
+docker compose -f backend/compose.yaml up --build -d --wait
+```
+
+- HR-кабинет: http://localhost:5173.
+- Кабинет сотрудника: http://localhost:3000.
+- API и Swagger: http://localhost:8000/docs.
+- Логины: `hr` для HR-кабинета, `employee` для кабинета сотрудника.
+  Пароль — значение `DEMO_PASSWORD` из `backend/.env`.
+
+Compose запускает PostgreSQL, применяет миграции, при включённом demo seed
+импортирует канонические данные из `frontend/public/data` и поднимает API и оба UI.
+Источник данных для HR — PostgreSQL; `/api/v1/hr/workspace` возвращает только
+сотрудников разрешённых HR подразделений. Данные сохраняются в Docker volume.
+
+HR-кабинет позволяет просматривать сотрудников, навыки, цели, историю и аналитику.
+Изменение данных и подтверждение завершений в этом UI недоступны. Рекомендации
+в профилях рассчитываются в браузере как предварительный прогноз; импорт
+выполняется через admin API или CLI backend.
+
+В кабинете сотрудника доступны профиль и навыки, серверные рекомендации,
+выбор карьерной цели по вакансии, заявления навыков из каталога, запись на
+активности, отправка результата на независимое подтверждение и запрос оценки
+для повышения. Режимы Classic/RPG сохраняются в настройках пользователя.
+Отправка заявления или результата сама по себе не повышает подтверждённый
+уровень навыка.
+
+Корневая папка `docs/` исключена из Git правилом `/docs/`; документация
+`backend/docs/` остаётся частью репозитория. Секреты хранятся в локальном `.env`.
+
+Подробности: [HR frontend](frontend/README.md),
+[мобильный кабинет](frontend/mobile/README.md), [backend и импорт](backend/README.md).

@@ -1,6 +1,7 @@
-export type Grade = 'Junior' | 'Middle' | 'Senior' | 'Lead'
+export type Grade = string
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5
 export type Employee = {
+  external_id?: string; audience_grade?: string; target_profile?: RoleProfile | null; vacancy_status?: string | null
   employee_id: string; full_name: string; department: string; role: string; grade: Grade
   manager_id: string | null; hire_date: string; tenure_months: number; work_format: string
   preferred_language: string; career_goal: { target_role: string; target_grade: Grade } | null
@@ -11,15 +12,15 @@ export type RoleProfile = { role: string; grade: Grade; required_skills: Record<
 export type Event = {
   event_id: string; title: string; description: string
   type: 'compliance' | 'onboarding' | 'course' | 'workshop' | 'mentoring' | 'certification' | 'meetup'
-  format: 'online' | 'offline' | 'self_paced'; duration_hours: number; mandatory: boolean
+  format: 'online' | 'offline' | 'self_paced'; duration_hours: number; mandatory: boolean; repeatable?: boolean
   target_roles: string[]; target_grades: Grade[]
   develops_skills: Array<{ skill_id: string; gain: number; max_level: number }>
   prerequisites: Record<string, number>; upcoming_sessions: string[]
 }
 export type Activity = {
   record_id: string; employee_id: string; event_id: string; date: string; due_date: string
-  status: 'completed' | 'in_progress' | 'dropped' | 'no_show' | 'declined' | 'overdue'
-  completion_pct: number; score: number | null; feedback_rating: number | null; assigned_by: string
+  status: 'enrolled' | 'completion_pending' | 'completed' | 'in_progress' | 'dropped' | 'no_show' | 'declined' | 'overdue'
+  completion_pct: number | null; score: number | null; feedback_rating: number | null; assigned_by: string
 }
 export type CareerDataset = { employees: Employee[]; events: Event[]; skills: Skill[]; roleProfiles: RoleProfile[]; activities: Activity[]; asOfDate: string }
 export type RecommendationReason = { label: string; detail: string; icon: string }
