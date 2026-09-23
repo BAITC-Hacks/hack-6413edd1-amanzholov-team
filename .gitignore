@@ -2,7 +2,5 @@ __pycache__/
 *.pyc
 /data/
 /docs/
-.env
-!/examples/demo/.env
 server.log
 server-error.log
