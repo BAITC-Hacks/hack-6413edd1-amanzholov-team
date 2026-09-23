@@ -4,3 +4,5 @@ __pycache__/
 /docs/
 server.log
 server-error.log
+.env
+!/examples/demo/.env
